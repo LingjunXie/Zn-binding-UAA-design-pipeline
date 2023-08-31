@@ -1,7 +1,14 @@
 # Zn binding UAA design pipeline
 ## folder structure ##
     /scripts
+        atom_distance.py
+        find_closest_distance.py
+        organize_excel_files.py
+        uaa_chi_sample.py
         Zn_neighbor_to_Ala.py
+        atom_distance.sh
+        organize_folders.sh
+        uaa_chi_sample.sh
         
     /protins
         /$protein
@@ -47,7 +54,7 @@ M  END
 put mol2 file under /home/lx110/mol_file
 ```rust
 cd /home/lx110/mol_file
-/home/lx110/Rosetta/main/source/scripts/python/public/molfile_to_params_polymer.py -i APT.mol2 --name APT --clobber --polymer
+/home/lx110/Rosetta/main/source/scripts/python/public/molfile_to_params_polymer.py -i APC.mol2 --name APC --clobber --polymer
 ```
 
 **make input file**
@@ -113,16 +120,38 @@ TEMPERATURE 1
 
 ```rust
 cd /home/lx110/Rosetta/main/demos/public/make_rot_lib/inputs
-mkdir APT
-cd APT
+mkdir APC
+cd APC
 ```
 put all input file in this folder
 
 ```rust
 cd ../../outputs
-mkdir APT
-cd APT
+mkdir APC
+cd APC
 for i in {1..9}; do slurmit.py  --job APC_${i} --command "/home/lx110/Rosetta/main/source/bin/MakeRotLib.default.linuxgccrelease -extra_res_fa ../../inputs/APC/APC.params -options_file ../../inputs/APC/APC_${i}.in -make_rot_lib:output_logging false"; done
+```
+
+**Assemble libraries into one file**
+```rust
+../../scripts/make_final_from_phi_psi.pl APC
+```
+looking for APC.rotlib in output/APC folder, copy it into PATH/TO/Zn_binding_UAA_pipeline/UAAs/APC
+
+**Modifying params file**
+
+add those lines at the very bottom of original params file:
+
+```rust
+NCAA_ROTLIB_PATH ABSOLUTE_PATH_TO ROTLIB/APC.rotlib
+NCAA_ROTLIB_NUM_ROTAMER_BINS (# chi angles) (# rotamer number for each angle)
+```
+
+for example:
+
+```rust
+NCAA_ROTLIB_PATH /Users/lingjunxie/Desktop/Lab/UAA_project/Computational/Zn_binding/UAAs/APC/rotlib/APC.rotlib
+NCAA_ROTLIB_NUM_ROTAMER_BINS 4 3 2 2 2
 ```
 
 
